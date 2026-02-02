@@ -5,10 +5,9 @@ namespace EnergyPunk.Core
 {
     public class TimeSystem : MonoBehaviour
     {
-        public float gameMinutesPerRealSecond = 10f;
-        public float stepMinutes = 10f;
+        public float stepSeconds = 1f;
 
-        private float _accumulatedMinutes;
+        private float _accum;
         private readonly List<ITickable> _tickables = new();
 
         public void Register(ITickable t)
@@ -17,24 +16,18 @@ namespace EnergyPunk.Core
                 _tickables.Add(t);
         }
 
-        public void Unregister(ITickable t)
-        {
-            _tickables.Remove(t);
-        }
+        public void Unregister(ITickable t) => _tickables.Remove(t);
 
         void Update()
         {
-            _accumulatedMinutes += gameMinutesPerRealSecond * Time.deltaTime;
-
-            while (_accumulatedMinutes >= stepMinutes)
+            _accum += Time.deltaTime;
+            while (_accum >= stepSeconds)
             {
                 for (int i = 0; i < _tickables.Count; i++)
-                    _tickables[i].Tick(stepMinutes);
+                    _tickables[i].Tick(stepSeconds);
 
-                _accumulatedMinutes -= stepMinutes;
+                _accum -= stepSeconds;
             }
-            Debug.Log("TimeSystem ticking");
-
         }
     }
 }
