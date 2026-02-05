@@ -1,8 +1,8 @@
-using UnityEngine;
 using EnergyPunk.Buildings;
 using EnergyPunk.Core;
-using EnergyPunk.Resources;
 using EnergyPunk.Population;
+using EnergyPunk.Resources;
+using UnityEngine;
 
 namespace EnergyPunk.Systems
 {
@@ -19,11 +19,22 @@ namespace EnergyPunk.Systems
         public StationBase storagePrefab;
         public StationBase housingPrefab;
 
+        public void UI_SelectGenerator() => Select(StationType.Generator);
+        public void UI_SelectKitchen() => Select(StationType.Kitchen);
+        public void UI_SelectWorkshop() => Select(StationType.Workshop);
+        public void UI_SelectStorage() => Select(StationType.Storage);
+        public void UI_SelectHousing() => Select(StationType.Housing);
+
+
         private StationType _selected = StationType.Generator;
 
         private StationBase _pendingAssignStation;
         private string _buffer = "";
         private string _lastBufferLogged = "";
+        public StationType SelectedType => _selected;
+        public bool IsAssigning => _pendingAssignStation != null;
+        public string AssignBuffer => _buffer;
+
 
         void Update()
         {
@@ -44,11 +55,43 @@ namespace EnergyPunk.Systems
             }
         }
 
+        public bool HasPendingStation => _pendingAssignStation != null;
+
+        public void UI_ConfirmAssign(int workers)
+        {
+            if (_pendingAssignStation == null) return;
+
+            int cap = _pendingAssignStation.capacity;
+            int desired = Mathf.Clamp(workers, 0, cap);
+
+            bool ok = _pendingAssignStation.SetWorkers(desired);
+            if (!ok)
+            {
+                Debug.LogWarning($"[ASSIGN] Not enough free workers. Need {desired}, Free {workerPool.Free}.");
+                return;
+            }
+
+            Debug.Log($"[ASSIGN] Confirmed: {desired}/{cap} -> Efficiency {_pendingAssignStation.Efficiency:0.00}");
+
+            _pendingAssignStation = null;
+            _buffer = "";
+            _lastBufferLogged = "";
+        }
+
+
         void Select(StationType t)
         {
             _selected = t;
+
+            if (workerPool == null)
+            {
+                Debug.LogWarning($"[SELECT] {_selected} | WorkerPool is NULL (assign it in Inspector).");
+                return;
+            }
+
             Debug.Log($"[SELECT] {_selected} | Free workers: {workerPool.Free}/{workerPool.Total}");
         }
+
 
         void TryPlaceOnClickedRoom()
         {

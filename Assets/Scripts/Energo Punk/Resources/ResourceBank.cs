@@ -39,13 +39,20 @@ namespace EnergyPunk.Resources
             OnChanged?.Invoke(t, v);
         }
 
-        public void Add(ResourceType t, float amount)
+        //public void Add(ResourceType t, float amount)
+        //{
+        //    if (amount <= 0f) return;
+        //    float v = Get(t) + amount;
+        //    _res[t] = v;
+        //    OnChanged?.Invoke(t, v);
+        //}
+
+        public void Add(ResourceType type, float amount)
         {
             if (amount <= 0f) return;
-            float v = Get(t) + amount;
-            _res[t] = v;
-            OnChanged?.Invoke(t, v);
+            Set(type, Get(type) + amount);
         }
+
 
         public bool Spend(ResourceType t, float amount)
         {

@@ -62,10 +62,14 @@ namespace EnergyPunk.Buildings
 
             float eff = Efficiency;
 
-            float needEnergy = energyPerSecond * deltaSeconds * eff;
-            if (bank.Get(ResourceType.Energy) < needEnergy) return;
+            if (type != StationType.Generator)
+            {
+                float needEnergy = energyPerSecond * deltaSeconds * eff;
+                if (bank.Get(ResourceType.Energy) < needEnergy) return;
 
-            bank.Spend(ResourceType.Energy, needEnergy);
+                bank.Spend(ResourceType.Energy, needEnergy);
+                
+            }
             OnTick(deltaSeconds, eff);
         }
 
